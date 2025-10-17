@@ -1,0 +1,276 @@
+using System;
+using System.Collections.Generic;
+
+namespace DesafioPoo
+{
+    public class Proprietario
+    {
+        public string Nome { get; set; }
+        public string Telefone { get; set; }
+        public string CPF { get; set; }
+
+        public Proprietario(string nome, string telefone, string cpf)
+        {
+            Nome = nome;
+            Telefone = telefone;
+            CPF = cpf;
+        }
+
+        public string ContatoProprietario()
+        {
+            return $"Contato: {Nome} - Tel: {Telefone}";
+        }
+    }
+
+    public abstract class Imovel
+    {
+        protected string endereco;
+        protected int numero;
+        protected bool alugado;
+        protected Proprietario proprietario;
+
+        public Imovel(string endereco, int numero, Proprietario proprietario)
+        {
+            this.endereco = endereco;
+            this.numero = numero;
+            this.alugado = false;
+            this.proprietario = proprietario;
+        }
+        public string GetEndereco() => endereco;
+        public int GetNumero() => numero;
+        public bool EstaAlugado() => alugado;
+        public void SetAlugado(bool status) => alugado = status;
+
+        public string ContatoProprietario() => proprietario.ContatoProprietario();
+
+        public abstract decimal CalcularAluguel(int meses);
+        public abstract string StatusImovel();
+
+        public void MostrarInfo()
+        {
+            Console.WriteLine($"{endereco}, {numero} - {StatusImovel()}");
+        }
+    }
+    public class Casa : Imovel
+    {
+        private decimal valorMensal;
+
+        public Casa(string endereco, int numero, Proprietario proprietario, decimal valorMensal)
+            : base(endereco, numero, proprietario)
+        {
+            this.valorMensal = valorMensal;
+        }
+
+        public override string StatusImovel()
+        {
+            return alugado ? "A casa está alugada" : "A casa está disponível";
+        }
+
+        public override decimal CalcularAluguel(int meses)
+        {
+            decimal valorTotal = valorMensal * meses;
+
+            if (meses > 24)
+            {
+                valorTotal = valorTotal * 0.9m;
+            }
+
+            return valorTotal;
+        }
+
+        public decimal GetValorMensal() => valorMensal;
+    }
+
+    public class Apartamento : Imovel
+    {
+        private decimal valorMensal;
+
+        public Apartamento(string endereco, int numero, Proprietario proprietario, decimal valorMensal)
+            : base(endereco, numero, proprietario)
+        {
+            this.valorMensal = valorMensal;
+        }
+
+        public override string StatusImovel()
+        {
+            return alugado ? $"O apartamento de número {numero} está alugado"
+                           : $"O apartamento de número {numero} está disponível";
+        }
+
+        public override decimal CalcularAluguel(int meses)
+        {
+            decimal valorTotal = valorMensal * meses;
+            if (meses > 24)
+            {
+                valorTotal = valorTotal * 0.9m;
+            }
+
+            return valorTotal;
+        }
+
+        public decimal GetValorMensal() => valorMensal;
+    }
+
+    class Program
+    {
+        static List<Imovel> imoveis = new List<Imovel>();
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("=== CORRETORA IMOBILIÁRIA ===");
+
+            while (true)
+            {
+                Console.WriteLine("\n1. Cadastrar Casa");
+                Console.WriteLine("2. Cadastrar Apartamento");
+                Console.WriteLine("3. Listar Imóveis");
+                Console.WriteLine("4. Alugar/Disponibilizar");
+                Console.WriteLine("5. Calcular Aluguel");
+                Console.WriteLine("6. Deletar Imóvel");
+                Console.WriteLine("0. Sair");
+                Console.Write("Opção: ");
+
+                string opcao = Console.ReadLine() ?? "";
+
+                switch (opcao)
+                {
+                    case "1": CadastrarCasa(); break;
+                    case "2": CadastrarApartamento(); break;
+                    case "3": ListarImoveis(); break;
+                    case "4": AlterarStatus(); break;
+                    case "5": CalcularAluguel(); break;
+                    case "6": DeletarImovel(); break;
+                    case "0": return;
+                    default: Console.WriteLine("Opção inválida!"); break;
+                }
+            }
+        }
+
+        static void CadastrarCasa()
+        {
+            Console.Write("Endereço: ");
+            string endereco = Console.ReadLine() ?? "";
+
+            Console.Write("Número: ");
+            int numero = int.Parse(Console.ReadLine() ?? "0");
+
+            Console.Write("Nome proprietário: ");
+            string nome = Console.ReadLine() ?? "";
+
+            Console.Write("Telefone: ");
+            string telefone = Console.ReadLine() ?? "";
+
+            Console.Write("CPF: ");
+            string cpf = Console.ReadLine() ?? "";
+
+            Console.Write("Valor mensal: ");
+            decimal valor = decimal.Parse(Console.ReadLine() ?? "0");
+
+            var proprietario = new Proprietario(nome, telefone, cpf);
+            var casa = new Casa(endereco, numero, proprietario, valor);
+
+            imoveis.Add(casa);
+            Console.WriteLine("Casa cadastrada!");
+        }
+
+        static void CadastrarApartamento()
+        {
+            Console.Write("Endereço: ");
+            string endereco = Console.ReadLine() ?? "";
+
+            Console.Write("Número: ");
+            int numero = int.Parse(Console.ReadLine() ?? "0");
+
+            Console.Write("Nome proprietário: ");
+            string nome = Console.ReadLine() ?? "";
+
+            Console.Write("Telefone: ");
+            string telefone = Console.ReadLine() ?? "";
+
+            Console.Write("CPF: ");
+            string cpf = Console.ReadLine() ?? "";
+
+            Console.Write("Valor mensal: ");
+            decimal valor = decimal.Parse(Console.ReadLine() ?? "0");
+
+            var proprietario = new Proprietario(nome, telefone, cpf);
+            var apartamento = new Apartamento(endereco, numero, proprietario, valor);
+
+            imoveis.Add(apartamento);
+            Console.WriteLine("Apartamento cadastrado!");
+        }
+
+        static void ListarImoveis()
+        {
+            if (imoveis.Count == 0)
+            {
+                Console.WriteLine("Nenhum imóvel cadastrado.");
+                return;
+            }
+
+            Console.WriteLine("\n=== IMÓVEIS ===");
+            for (int i = 0; i < imoveis.Count; i++)
+            {
+                Console.Write($"{i + 1}. ");
+                imoveis[i].MostrarInfo();
+                Console.WriteLine($"   {imoveis[i].ContatoProprietario()}");
+            }
+        }
+
+        static void AlterarStatus()
+        {
+            ListarImoveis();
+            if (imoveis.Count == 0) return;
+
+            Console.Write("Qual imóvel? (número): ");
+            int indice = int.Parse(Console.ReadLine() ?? "1") - 1;
+
+            if (indice >= 0 && indice < imoveis.Count)
+            {
+                bool status = !imoveis[indice].EstaAlugado();
+                imoveis[indice].SetAlugado(status);
+
+                string acao = status ? "alugado" : "disponibilizado";
+                Console.WriteLine($"Imóvel {acao}!");
+            }
+        }
+
+        static void CalcularAluguel()
+        {
+            ListarImoveis();
+            if (imoveis.Count == 0) return;
+
+            Console.Write("Qual imóvel? (número): ");
+            int indice = int.Parse(Console.ReadLine() ?? "1") - 1;
+
+            Console.Write("Quantos meses? ");
+            int meses = int.Parse(Console.ReadLine() ?? "1");
+
+            if (indice >= 0 && indice < imoveis.Count)
+            {
+                decimal valor = imoveis[indice].CalcularAluguel(meses);
+                Console.WriteLine($"Valor total por {meses} meses: R$ {valor:F2}");
+
+                if (meses > 24)
+                {
+                    Console.WriteLine("Desconto de 10% aplicado!");
+                }
+            }
+        }
+
+        static void DeletarImovel()
+        {
+            ListarImoveis();
+            if (imoveis.Count == 0) return;
+
+            Console.Write("Qual imóvel deletar? (número): ");
+            int indice = int.Parse(Console.ReadLine() ?? "1") - 1;
+
+            if (indice >= 0 && indice < imoveis.Count)
+            {
+                imoveis.RemoveAt(indice);
+                Console.WriteLine("Imóvel deletado!");
+            }
+        }
+    }
+}
